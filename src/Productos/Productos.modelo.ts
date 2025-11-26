@@ -1,4 +1,4 @@
-import mongoose, { Schema, model, Document, Model } from "mongoose";
+import { Schema, model, Document, Model } from "mongoose";
 
 // 1. Interfaz que extiende Document para el tipado de Mongoose
 // Primero creamos la interfaz IProducto que extiende Document.
@@ -7,6 +7,7 @@ export interface IProducto extends Document {
   precio: number;
   stock: number;
   descripcion?: string;
+  img?: string;
   categoria?: string;
   activo: boolean;
 
@@ -20,6 +21,7 @@ export class ProductoClass {
   precio!: number;
   stock!: number;
   descripcion?: string;
+  img?: string;
   categoria?: string;
   activo!: boolean;
 
@@ -42,6 +44,7 @@ const ProductoSchema = new Schema<IProducto>(
     precio: { type: Number, required: true },
     stock: { type: Number, required: true, default: 0 },
     descripcion: { type: String, required: false },
+    img: { type: String, required: false },
     categoria: { type: String, required: false },
     activo: { type: Boolean, required: false, default: true },
   },

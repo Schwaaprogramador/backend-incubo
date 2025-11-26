@@ -9,3 +9,6 @@ import { Server } from "./src/Server.js";
 
   await server.start();
 })();
+
+// Documentacion
+// Recordar que al instalar los dependencias al ser un rpoyecto con ts, tambien hay que instalar los types.

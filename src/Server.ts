@@ -3,6 +3,10 @@ import type { Application, Router, Request, Response } from "express";
 import { Mongo } from "./MongoConfig.ts";
 import dotenv from "dotenv";
 dotenv.config();
+import cors from "cors";
+
+
+
 
 interface Options {
   port: number;
@@ -30,6 +34,13 @@ export class Server {
 
   private config(): void {
     this.app.use(express.json());
+
+    // <-- INTEGRA CORS AQUÍ (antes de las rutas)
+    this.app.use(cors({
+      origin: "*", // Permite todos los orígenes (puedes cambiarlo por un dominio específico)
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"]
+    }));
   }
 
   async start(): Promise<void> {
