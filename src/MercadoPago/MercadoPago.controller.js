@@ -1,11 +1,11 @@
-import type { Request, Response } from "express";
-import { crearPreferenciaMP } from "./MercadoPago.service.ts";
 
-export const crearPago = async (req: Request, res: Response) => {
+import createPreference from "./MercadoPago.service"
+
+export const crearPago = async (req, res) => {
     try {
         const { id, title, price, quantity } = req.body;
 
-        const preference = await crearPreferenciaMP({
+        const preference = await createPreference({
             id,
             title,
             price,
@@ -22,7 +22,7 @@ export const crearPago = async (req: Request, res: Response) => {
     }
 };
 
-export const webhookMP = (req: Request, res: Response) => {
+export const webhookMP = (req, res) => {
     console.log("Webhook MercadoPago:", req.body);
 
     // Aquí luego validas el pago con la API

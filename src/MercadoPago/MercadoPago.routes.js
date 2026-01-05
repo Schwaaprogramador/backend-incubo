@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { crearPago, webhookMP } from "./MercadoPago.controller.ts";
+import { crearPago, webhookMP } from "./MercadoPago.controller.js";
 
 const router = Router();
 
