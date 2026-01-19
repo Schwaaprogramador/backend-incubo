@@ -1,33 +1,17 @@
-
-import createPreference from "./MercadoPago.service"
-
-
-
+import createPreference from "./MercadoPago.service";
 
 export const crearPago = async (req, res) => {
-    
     try {
-        const { id, title, price, quantity } = req.body;
-        
-        const preference = await createPreference({
-            id,
-            title,
-            price,
-            quantity,
+        // ENVÍAS DIRECTO EL BODY TAL CUAL
+        const mpResponse = await createPreference(req.body);
+
+        res.status(201).json({
+            preferenceId: mpResponse.id,
+            initPoint: mpResponse.init_point
         });
-        
-        res.json(preference);
+
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Error creando pago" });
+        console.error("Error creando pago:", error);
+        res.status(500).json({ error: error.message });
     }
-};
-
-
-
-export const webhookMP = (req, res) => {
-    console.log("Webhook MercadoPago:", req.body);
-
-    // Aquí luego validas el pago con la API
-    res.sendStatus(200);
 };
