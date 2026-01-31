@@ -2,6 +2,7 @@ import { Router } from "express";
 import productosRouter from './Productos/Productos.routes.ts'
 import mercadopagoRoutes from './MercadoPago/MercadoPago.routes.js';
 import usuariosRouter from './Usuarios/Usuarios.routes.js';
+import categoriasRouter from './Categorias/Categorias.routes.js';
 
 
 export class AppRoutes {
@@ -11,6 +12,7 @@ export class AppRoutes {
         router.use('/productos', productosRouter)
         router.use('/mercadopago', mercadopagoRoutes);
         router.use('/usuarios', usuariosRouter);
+        router.use('/categorias', categoriasRouter);
         return router
     }
 }
