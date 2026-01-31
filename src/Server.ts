@@ -1,12 +1,14 @@
 import express from "express";
-import type { Application, Router, Request, Response } from "express";
+import type { Application, Router } from "express";
 import { Mongo } from "./MongoConfig.ts";
 import dotenv from "dotenv";
 dotenv.config();
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 
-
-
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 interface Options {
   port: number;
@@ -35,12 +37,16 @@ export class Server {
   private config(): void {
     this.app.use(express.json());
 
-    // <-- INTEGRA CORS AQUÍ (antes de las rutas)
+    // CORS
     this.app.use(cors({
-      origin: "*", // Permite todos los orígenes (puedes cambiarlo por un dominio específico)
+      origin: "*",
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"]
     }));
+
+    // Servir archivos estáticos desde uploads
+    const uploadsPath = path.join(__dirname, "../uploads");
+    this.app.use("/uploads", express.static(uploadsPath));
   }
 
   async start(): Promise<void> {
