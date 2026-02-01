@@ -1,4 +1,4 @@
-import type { Response } from "express";
+import type { Request, Response } from "express";
 import { UsuariosService } from "./Usuarios.service.js";
 import { generarToken } from "../middleware/auth.middleware.js";
 import type { AuthRequest, JwtPayload } from "../middleware/auth.middleware.js";
@@ -112,10 +112,10 @@ export default class UsuariosController {
 
   public async crearUsuario(req: AuthRequest, res: Response) {
     try {
-      const { email, password, nombre, rol } = req.body;
+      const { email, password, nombre, apellido, telefono, direccion, rol } = req.body;
 
-      if (!email || !password || !nombre) {
-        res.status(400).json({ error: "Email, contraseña y nombre son requeridos" });
+      if (!email || !nombre) {
+        res.status(400).json({ error: "Email y nombre son requeridos" });
         return;
       }
 
@@ -125,10 +125,43 @@ export default class UsuariosController {
         return;
       }
 
-      const nuevo = await this.usuariosService.crear({ email, password, nombre, rol });
+      const nuevo = await this.usuariosService.crear({
+        email,
+        password: password || undefined,
+        nombre,
+        apellido,
+        telefono,
+        direccion,
+        rol
+      });
       res.status(201).json(nuevo);
     } catch (error: any) {
       res.status(400).json({ error: error.message || "Error al crear usuario" });
+    }
+  }
+
+  // Ruta pública para registro de clientes desde checkout
+  public async registrarCliente(req: Request, res: Response) {
+    try {
+      const { email, nombre, apellido, telefono, direccion } = req.body;
+
+      if (!email || !nombre) {
+        res.status(400).json({ error: "Email y nombre son requeridos" });
+        return;
+      }
+
+      const cliente = await this.usuariosService.crearOActualizarCliente({
+        email,
+        nombre,
+        apellido,
+        telefono,
+        direccion,
+        rol: "cliente"
+      });
+
+      res.status(201).json(cliente);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message || "Error al registrar cliente" });
     }
   }
 

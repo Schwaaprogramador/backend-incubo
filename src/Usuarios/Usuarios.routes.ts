@@ -7,6 +7,7 @@ const usuariosController = new UsuariosController();
 
 // Rutas públicas
 usuariosRouter.post("/login", (req, res) => usuariosController.login(req, res));
+usuariosRouter.post("/registro-cliente", (req, res) => usuariosController.registrarCliente(req, res));
 
 // Rutas protegidas (requieren token)
 usuariosRouter.get("/verificar", verificarToken, (req, res) => usuariosController.verificar(req, res));

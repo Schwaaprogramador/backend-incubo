@@ -2,9 +2,16 @@ import { Schema, model, Document } from "mongoose";
 
 export interface IUsuario extends Document {
   email: string;
-  password: string;
+  password?: string;
   nombre: string;
-  rol: "admin" | "usuario";
+  apellido?: string;
+  telefono?: string;
+  direccion?: {
+    calle: string;
+    numero: string;
+    codigoPostal: string;
+  };
+  rol: "admin" | "usuario" | "cliente";
   activo: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -21,17 +28,32 @@ const UsuarioSchema = new Schema<IUsuario>(
     },
     password: {
       type: String,
-      required: true
+      required: false
     },
     nombre: {
       type: String,
       required: true,
       trim: true
     },
+    apellido: {
+      type: String,
+      required: false,
+      trim: true
+    },
+    telefono: {
+      type: String,
+      required: false,
+      trim: true
+    },
+    direccion: {
+      calle: { type: String },
+      numero: { type: String },
+      codigoPostal: { type: String }
+    },
     rol: {
       type: String,
-      enum: ["admin", "usuario"],
-      default: "usuario"
+      enum: ["admin", "usuario", "cliente"],
+      default: "cliente"
     },
     activo: {
       type: Boolean,
