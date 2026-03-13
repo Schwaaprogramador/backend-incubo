@@ -11,11 +11,18 @@ console.log("✅ Instancia de Preference creada");
 const createPreference = async (preferenceData) => {
     console.log("🔵 createPreference() - Iniciando...");
 
+    const webUrl = process.env.WEB_URL || "http://localhost:4321";
+    const back_urls = {
+        success: `${webUrl}/checkout/success`,
+        failure: `${webUrl}/checkout/failure`,
+        pending: `${webUrl}/checkout/pending`
+    };
+
     try {
         console.log("🔵 Datos a enviar a MP:", JSON.stringify(preferenceData, null, 2));
 
         const response = await preference.create({
-            body: preferenceData
+            body: { ...preferenceData, back_urls, auto_return: "approved" }
         });
 
         console.log("✅ Respuesta MP exitosa - ID:", response.id);

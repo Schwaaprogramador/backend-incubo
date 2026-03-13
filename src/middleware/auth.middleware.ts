@@ -11,7 +11,10 @@ export interface AuthRequest extends Request {
   usuario?: JwtPayload;
 }
 
-const JWT_SECRET: string = process.env.JWT_SECRET || "incubo_secret_key_desarrollo";
+if (!process.env.JWT_SECRET) {
+  throw new Error("JWT_SECRET no está definido en las variables de entorno. El servidor no puede iniciarse de forma segura.");
+}
+const JWT_SECRET: string = process.env.JWT_SECRET;
 
 export function verificarToken(req: AuthRequest, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;

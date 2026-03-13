@@ -33,8 +33,7 @@ export const crearPago = async (req, res) => {
             console.error("❌ Cause:", JSON.stringify(error.cause, null, 2));
         }
         res.status(500).json({
-            error: error.message,
-            details: error.cause || "Sin detalles adicionales"
+            error: "Error al procesar el pago. Por favor intentá de nuevo."
         });
     }
 };

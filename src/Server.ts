@@ -38,8 +38,18 @@ export class Server {
     this.app.use(express.json());
 
     // CORS
+    const allowedOrigins = [
+      process.env.WEB_URL || "http://localhost:4321",
+      process.env.ADMIN_URL || "http://localhost:5173",
+    ];
     this.app.use(cors({
-      origin: "*",
+      origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error(`CORS: origen no permitido: ${origin}`));
+        }
+      },
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"]
     }));
