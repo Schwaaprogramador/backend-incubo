@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { AppRoutes } from "./src/Routes.js";
 import { Server } from "./src/Server.js";
 
