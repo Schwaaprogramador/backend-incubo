@@ -1,5 +1,5 @@
 import { CategoriaModel } from "./Categorias.modelo.js";
-import type { ICategoria } from "./Categorias.modelo.js";
+import type { ICategoria, ISubcategoria } from "./Categorias.modelo.js";
 
 export class CategoriasService {
   async obtenerTodas() {
@@ -29,5 +29,38 @@ export class CategoriasService {
 
   async eliminar(id: string) {
     return CategoriaModel.findByIdAndDelete(id);
+  }
+
+  async agregarSubcategoria(categoriaId: string, data: Partial<ISubcategoria>) {
+    return CategoriaModel.findByIdAndUpdate(
+      categoriaId,
+      { $push: { subcategorias: data } },
+      { new: true }
+    );
+  }
+
+  async actualizarSubcategoria(categoriaId: string, subId: string, data: Partial<ISubcategoria>) {
+    return CategoriaModel.findByIdAndUpdate(
+      categoriaId,
+      {
+        $set: {
+          "subcategorias.$[sub].nombre": data.nombre,
+          ...(data.descripcion !== undefined && { "subcategorias.$[sub].descripcion": data.descripcion }),
+          ...(data.activo !== undefined && { "subcategorias.$[sub].activo": data.activo }),
+        }
+      },
+      {
+        arrayFilters: [{ "sub._id": subId }],
+        new: true
+      }
+    );
+  }
+
+  async eliminarSubcategoria(categoriaId: string, subId: string) {
+    return CategoriaModel.findByIdAndUpdate(
+      categoriaId,
+      { $pull: { subcategorias: { _id: subId } } },
+      { new: true }
+    );
   }
 }

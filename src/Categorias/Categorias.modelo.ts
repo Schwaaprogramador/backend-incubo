@@ -1,12 +1,26 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document, Types } from "mongoose";
+
+export interface ISubcategoria {
+  _id?: Types.ObjectId;
+  nombre: string;
+  descripcion?: string;
+  activo: boolean;
+}
 
 export interface ICategoria extends Document {
   nombre: string;
   descripcion?: string;
   activo: boolean;
+  subcategorias: ISubcategoria[];
   createdAt: Date;
   updatedAt: Date;
 }
+
+const SubcategoriaSchema = new Schema<ISubcategoria>({
+  nombre: { type: String, required: true, trim: true },
+  descripcion: { type: String, required: false, trim: true },
+  activo: { type: Boolean, default: true },
+});
 
 const CategoriaSchema = new Schema<ICategoria>(
   {
@@ -24,6 +38,10 @@ const CategoriaSchema = new Schema<ICategoria>(
     activo: {
       type: Boolean,
       default: true
+    },
+    subcategorias: {
+      type: [SubcategoriaSchema],
+      default: []
     },
   },
   {

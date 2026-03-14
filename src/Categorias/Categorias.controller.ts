@@ -66,6 +66,7 @@ export default class CategoriasController {
         nombre: nombre.trim(),
         descripcion: descripcion?.trim() || undefined,
         activo: activo !== undefined ? activo : true,
+        subcategorias: [],
       });
 
       res.status(201).json(nueva);
@@ -125,6 +126,79 @@ export default class CategoriasController {
       }
 
       res.status(200).json({ mensaje: "Categoría eliminada correctamente" });
+    } catch (error) {
+      res.status(400).json({ error: "ID no válido o error al eliminar" });
+    }
+  }
+
+  // --- Subcategorías ---
+
+  public async agregarSubcategoria(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { nombre, descripcion, activo } = req.body;
+
+      if (!nombre || !nombre.trim()) {
+        res.status(400).json({ error: "El nombre es requerido" });
+        return;
+      }
+
+      const actualizada = await this.categoriasService.agregarSubcategoria(id, {
+        nombre: nombre.trim(),
+        descripcion: descripcion?.trim() || undefined,
+        activo: activo !== undefined ? activo : true,
+      });
+
+      if (!actualizada) {
+        res.status(404).json({ error: "Categoría no encontrada" });
+        return;
+      }
+
+      res.status(201).json(actualizada);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message || "Error al agregar subcategoría" });
+    }
+  }
+
+  public async actualizarSubcategoria(req: Request, res: Response) {
+    try {
+      const { id, subId } = req.params;
+      const { nombre, descripcion, activo } = req.body;
+
+      if (!nombre || !nombre.trim()) {
+        res.status(400).json({ error: "El nombre es requerido" });
+        return;
+      }
+
+      const actualizada = await this.categoriasService.actualizarSubcategoria(id, subId, {
+        nombre: nombre.trim(),
+        descripcion: descripcion?.trim() || undefined,
+        activo: activo !== undefined ? activo : true,
+      });
+
+      if (!actualizada) {
+        res.status(404).json({ error: "Categoría o subcategoría no encontrada" });
+        return;
+      }
+
+      res.status(200).json(actualizada);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message || "Error al actualizar subcategoría" });
+    }
+  }
+
+  public async eliminarSubcategoria(req: Request, res: Response) {
+    try {
+      const { id, subId } = req.params;
+
+      const actualizada = await this.categoriasService.eliminarSubcategoria(id, subId);
+
+      if (!actualizada) {
+        res.status(404).json({ error: "Categoría no encontrada" });
+        return;
+      }
+
+      res.status(200).json({ mensaje: "Subcategoría eliminada correctamente" });
     } catch (error) {
       res.status(400).json({ error: "ID no válido o error al eliminar" });
     }

@@ -9,6 +9,7 @@ export interface IProducto extends Document {
   descripcion?: string;
   img?: string;
   categoria?: string;
+  subcategoria?: string;
   activo: boolean;
 
   // Métodos de instancia (declaración)
@@ -23,6 +24,7 @@ export class ProductoClass {
   descripcion?: string;
   img?: string;
   categoria?: string;
+  subcategoria?: string;
   activo!: boolean;
 
   // ✅ Método de instancia real
@@ -46,6 +48,7 @@ const ProductoSchema = new Schema<IProducto>(
     descripcion: { type: String, required: false },
     img: { type: String, required: false },
     categoria: { type: String, required: false },
+    subcategoria: { type: String, required: false },
     activo: { type: Boolean, required: false, default: true },
   },
   {
