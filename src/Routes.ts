@@ -5,6 +5,7 @@ import usuariosRouter from './Usuarios/Usuarios.routes.js';
 import categoriasRouter from './Categorias/Categorias.routes.js';
 import relatosRouter from './Relatos/Relatos.routes.ts';
 import pedidosRouter from './Pedidos/Pedidos.routes.js';
+import contactoRouter from './Contacto/Contacto.routes.ts';
 
 
 export class AppRoutes {
@@ -17,6 +18,7 @@ export class AppRoutes {
         router.use('/categorias', categoriasRouter);
         router.use('/relatos', relatosRouter);
         router.use('/pedidos', pedidosRouter);
+        router.use('/contacto', contactoRouter);
         return router
     }
 }
