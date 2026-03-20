@@ -1,14 +1,12 @@
 import { Router } from "express";
-import { crearPago } from "./MercadoPago.controller.js";
+import { crearPago, recibirWebhook } from "./MercadoPago.controller.js";
 
 const router = Router();
 
-console.log("✅ MercadoPago routes cargadas");
+// Webhook de MP — debe estar ANTES de cualquier middleware de parseo especial
+// MP envía POST con body JSON
+router.post("/webhook", recibirWebhook);
 
-router.post("/crear-pago", (req, res, next) => {
-    console.log("🔵 POST /mercadopago/crear-pago - Request recibido");
-    console.log("🔵 Body:", JSON.stringify(req.body, null, 2));
-    next();
-}, crearPago);
+router.post("/crear-pago", crearPago);
 
 export default router;

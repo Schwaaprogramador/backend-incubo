@@ -22,6 +22,14 @@ export class ProductosService {
     return ProductoModel.findByIdAndDelete(id);
   }
 
+  async reducirStock(productoId: string, cantidad: number) {
+    return ProductoModel.findByIdAndUpdate(
+      productoId,
+      { $inc: { stock: -cantidad } },
+      { new: true }
+    );
+  }
+
   async prueba() {
     return { mensaje: "Endpoint de prueba funcionando 🚀" };
   }

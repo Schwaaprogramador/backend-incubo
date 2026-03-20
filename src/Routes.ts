@@ -4,6 +4,7 @@ import mercadopagoRoutes from './MercadoPago/MercadoPago.routes.js';
 import usuariosRouter from './Usuarios/Usuarios.routes.js';
 import categoriasRouter from './Categorias/Categorias.routes.js';
 import relatosRouter from './Relatos/Relatos.routes.ts';
+import pedidosRouter from './Pedidos/Pedidos.routes.js';
 
 
 export class AppRoutes {
@@ -15,6 +16,7 @@ export class AppRoutes {
         router.use('/usuarios', usuariosRouter);
         router.use('/categorias', categoriasRouter);
         router.use('/relatos', relatosRouter);
+        router.use('/pedidos', pedidosRouter);
         return router
     }
 }
