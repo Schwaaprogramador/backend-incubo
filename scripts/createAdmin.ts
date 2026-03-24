@@ -6,7 +6,7 @@ dotenv.config();
 
 const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/backend_incubo";
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@incubo.com";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD as string;
 const ADMIN_NOMBRE = process.env.ADMIN_NOMBRE || "Administrador";
 
 if (!ADMIN_PASSWORD) {
