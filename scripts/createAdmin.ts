@@ -5,6 +5,14 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/backend_incubo";
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@incubo.com";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+const ADMIN_NOMBRE = process.env.ADMIN_NOMBRE || "Administrador";
+
+if (!ADMIN_PASSWORD) {
+  console.error("Error: ADMIN_PASSWORD no está definido en las variables de entorno.");
+  process.exit(1);
+}
 
 const UsuarioSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
@@ -21,10 +29,7 @@ async function createAdmin() {
     await mongoose.connect(MONGO_URI);
     console.log("Conectado a MongoDB");
 
-    const adminEmail = "admin@incubo.com";
-    const adminPassword = "admin123";
-
-    const existente = await Usuario.findOne({ email: adminEmail });
+    const existente = await Usuario.findOne({ email: ADMIN_EMAIL });
 
     if (existente) {
       console.log("El usuario admin ya existe:");
@@ -32,20 +37,19 @@ async function createAdmin() {
       console.log(`  Nombre: ${existente.nombre}`);
       console.log(`  Rol: ${existente.rol}`);
     } else {
-      const hashedPassword = await bcrypt.hash(adminPassword, 10);
+      const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
 
       const admin = new Usuario({
-        email: adminEmail,
+        email: ADMIN_EMAIL,
         password: hashedPassword,
-        nombre: "Administrador",
+        nombre: ADMIN_NOMBRE,
         rol: "admin",
         activo: true,
       });
 
       await admin.save();
       console.log("Usuario admin creado exitosamente:");
-      console.log(`  Email: ${adminEmail}`);
-      console.log(`  Password: ${adminPassword}`);
+      console.log(`  Email: ${ADMIN_EMAIL}`);
       console.log(`  Rol: admin`);
     }
 
