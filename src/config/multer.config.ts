@@ -2,6 +2,8 @@ import multer from "multer";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
+import sharp from "sharp";
+import type { Request, Response, NextFunction } from "express";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,18 +15,6 @@ const UPLOADS_DIR = path.join(__dirname, "../../uploads/productos");
 if (!fs.existsSync(UPLOADS_DIR)) {
   fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }
-
-// Configuración del storage
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, UPLOADS_DIR);
-  },
-  filename: (_req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname);
-    cb(null, `producto-${uniqueSuffix}${ext}`);
-  },
-});
 
 // Filtro de archivos (solo imágenes)
 const fileFilter = (
@@ -41,13 +31,29 @@ const fileFilter = (
   }
 };
 
-// Exportar configuración de multer
+// Multer con memory storage para procesar con sharp antes de guardar
 export const uploadProducto = multer({
-  storage,
+  storage: multer.memoryStorage(),
   fileFilter,
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB máximo
   },
 });
+
+// Middleware que convierte la imagen a WebP y la guarda en disco
+export async function convertToWebp(req: Request, _res: Response, next: NextFunction) {
+  if (!req.file) return next();
+
+  const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+  const filename = `producto-${uniqueSuffix}.webp`;
+  const filePath = path.join(UPLOADS_DIR, filename);
+
+  await sharp(req.file.buffer).webp({ quality: 85 }).toFile(filePath);
+
+  req.file.filename = filename;
+  req.file.path = filePath;
+
+  next();
+}
 
 export const UPLOADS_PATH = UPLOADS_DIR;
