@@ -38,10 +38,24 @@ export class Server {
     this.app.use(express.json());
 
     // CORS
+    const addWww = (url: string): string => {
+      try {
+        const u = new URL(url);
+        if (!u.hostname.startsWith("www.")) {
+          u.hostname = "www." + u.hostname;
+          return u.origin;
+        }
+      } catch {}
+      return "";
+    };
+    const webUrl = process.env.WEB_URL || "http://localhost:4321";
+    const adminUrl = process.env.ADMIN_URL || "http://localhost:5173";
     const allowedOrigins = [
-      process.env.WEB_URL || "http://localhost:4321",
-      process.env.ADMIN_URL || "http://localhost:5173",
-    ];
+      webUrl,
+      addWww(webUrl),
+      adminUrl,
+      addWww(adminUrl),
+    ].filter(Boolean);
     this.app.use(cors({
       origin: (origin, callback) => {
         if (!origin || allowedOrigins.includes(origin)) {
