@@ -8,6 +8,7 @@ export interface IProducto extends Document {
   stock: number;
   descripcion?: string;
   img?: string;
+  imagenes?: string[];
   categoria?: string;
   subcategoria?: string;
   activo: boolean;
@@ -23,6 +24,7 @@ export class ProductoClass {
   stock!: number;
   descripcion?: string;
   img?: string;
+  imagenes?: string[];
   categoria?: string;
   subcategoria?: string;
   activo!: boolean;
@@ -47,6 +49,7 @@ const ProductoSchema = new Schema<IProducto>(
     stock: { type: Number, required: true, default: 0 },
     descripcion: { type: String, required: false },
     img: { type: String, required: false },
+    imagenes: { type: [String], required: false, default: [] },
     categoria: { type: String, required: false },
     subcategoria: { type: String, required: false },
     activo: { type: Boolean, required: false, default: true },

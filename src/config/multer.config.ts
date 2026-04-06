@@ -40,7 +40,7 @@ export const uploadProducto = multer({
   },
 });
 
-// Middleware que convierte la imagen a WebP y la guarda en disco
+// Middleware que convierte la imagen a WebP y la guarda en disco (una sola)
 export async function convertToWebp(req: Request, _res: Response, next: NextFunction) {
   if (!req.file) return next();
 
@@ -52,6 +52,24 @@ export async function convertToWebp(req: Request, _res: Response, next: NextFunc
 
   req.file.filename = filename;
   req.file.path = filePath;
+
+  next();
+}
+
+// Middleware que convierte múltiples imágenes a WebP y las guarda en disco
+export async function convertToWebpArray(req: Request, _res: Response, next: NextFunction) {
+  if (!req.files || !Array.isArray(req.files) || req.files.length === 0) return next();
+
+  for (const file of req.files as Express.Multer.File[]) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const filename = `producto-${uniqueSuffix}.webp`;
+    const filePath = path.join(UPLOADS_DIR, filename);
+
+    await sharp(file.buffer).webp({ quality: 85 }).toFile(filePath);
+
+    file.filename = filename;
+    file.path = filePath;
+  }
 
   next();
 }

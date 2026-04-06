@@ -30,6 +30,32 @@ export class ProductosService {
     );
   }
 
+  async agregarImagenes(id: string, urls: string[]) {
+    return ProductoModel.findByIdAndUpdate(
+      id,
+      { $push: { imagenes: { $each: urls } } },
+      { new: true }
+    );
+  }
+
+  async eliminarImagenPorIndice(id: string, indice: number): Promise<{ url: string; producto: any } | null> {
+    const producto = await ProductoModel.findById(id);
+    if (!producto) return null;
+
+    const imagenes = producto.imagenes || [];
+    const url = imagenes[indice];
+    if (url === undefined) return null;
+
+    imagenes.splice(indice, 1);
+    const actualizado = await ProductoModel.findByIdAndUpdate(
+      id,
+      { imagenes, img: imagenes[0] ?? undefined },
+      { new: true }
+    );
+
+    return { url, producto: actualizado };
+  }
+
   async prueba() {
     return { mensaje: "Endpoint de prueba funcionando 🚀" };
   }

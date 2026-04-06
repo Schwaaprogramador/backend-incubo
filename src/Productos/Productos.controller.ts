@@ -41,10 +41,13 @@ export default class ProductosController {
     }
   }
 
-  // Crear un producto (con imagen opcional via multipart/form-data)
+  // Crear un producto (con imágenes opcionales via multipart/form-data)
   public async crearProducto(req: RequestType, res: ResponseType) {
     try {
-      const file = req.file as Express.Multer.File | undefined;
+      const files = req.files as Express.Multer.File[] | undefined;
+      const imagenes = files && files.length > 0
+        ? files.map(f => `/uploads/productos/${f.filename}`)
+        : [];
 
       const data = {
         nombre: req.body.nombre,
@@ -52,8 +55,10 @@ export default class ProductosController {
         stock: Number(req.body.stock),
         descripcion: req.body.descripcion || undefined,
         categoria: req.body.categoria || undefined,
+        subcategoria: req.body.subcategoria || undefined,
         activo: req.body.activo === "true" || req.body.activo === true,
-        img: file ? `/uploads/productos/${file.filename}` : (req.body.img || undefined),
+        imagenes,
+        img: imagenes[0] ?? req.body.img ?? undefined,
       };
 
       const nuevo = await this.productosService.crear(data);
@@ -63,44 +68,69 @@ export default class ProductosController {
     }
   }
 
-  // Subir imagen para un producto existente
-  public async subirImagen(req: RequestType, res: ResponseType) {
+  // Agregar imágenes a un producto existente
+  public async agregarImagenes(req: RequestType, res: ResponseType) {
     try {
       const { id } = req.params;
-      const file = req.file as Express.Multer.File | undefined;
+      const files = req.files as Express.Multer.File[] | undefined;
 
       if (!id) {
         res.status(400).json({ error: "ID no proporcionado" });
         return;
       }
 
-      if (!file) {
-        res.status(400).json({ error: "No se proporcionó ninguna imagen" });
+      if (!files || files.length === 0) {
+        res.status(400).json({ error: "No se proporcionaron imágenes" });
         return;
       }
 
       const producto = await this.productosService.obtenerPorId(id);
       if (!producto) {
-        // Eliminar archivo subido si el producto no existe
-        fs.unlinkSync(file.path);
+        files.forEach(f => { if (fs.existsSync(f.path)) fs.unlinkSync(f.path); });
         res.status(404).json({ error: "Producto no encontrado" });
         return;
       }
 
-      // Eliminar imagen anterior si existe
-      if (producto.img && producto.img.startsWith("/uploads/")) {
-        const oldPath = path.join(process.cwd(), producto.img);
-        if (fs.existsSync(oldPath)) {
-          fs.unlinkSync(oldPath);
-        }
-      }
+      const nuevasUrls = files.map(f => `/uploads/productos/${f.filename}`);
+      const imagenes = [...(producto.imagenes || []), ...nuevasUrls];
 
-      const imgUrl = `/uploads/productos/${file.filename}`;
-      const actualizado = await this.productosService.actualizar(id, { img: imgUrl });
+      const actualizado = await this.productosService.actualizar(id, {
+        imagenes,
+        img: imagenes[0],
+      });
 
       res.status(200).json(actualizado);
     } catch (error: any) {
-      res.status(400).json({ error: error.message || "Error al subir imagen" });
+      res.status(400).json({ error: error.message || "Error al agregar imágenes" });
+    }
+  }
+
+  // Eliminar una imagen por índice
+  public async eliminarImagen(req: RequestType, res: ResponseType) {
+    try {
+      const { id, indice } = req.params;
+      const idx = parseInt(indice);
+
+      if (!id || isNaN(idx) || idx < 0) {
+        res.status(400).json({ error: "Parámetros inválidos" });
+        return;
+      }
+
+      const result = await this.productosService.eliminarImagenPorIndice(id, idx);
+
+      if (!result) {
+        res.status(404).json({ error: "Producto o imagen no encontrada" });
+        return;
+      }
+
+      if (result.url.startsWith("/uploads/")) {
+        const filePath = path.join(process.cwd(), result.url);
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      }
+
+      res.status(200).json(result.producto);
+    } catch (error: any) {
+      res.status(400).json({ error: error.message || "Error al eliminar imagen" });
     }
   }
 
