@@ -38,6 +38,7 @@ export class Server {
   }
 
   private config(): void {
+    this.app.set("trust proxy", 1); // Confiar en el primer proxy (Nginx)
     this.app.use(express.json({ limit: "1mb" }));
     this.app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 
