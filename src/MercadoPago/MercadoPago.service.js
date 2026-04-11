@@ -15,12 +15,14 @@ const createPreference = async (preferenceData) => {
         console.log("🔵 createPreference() — items:", preferenceData.items?.length, "ref:", preferenceData.external_reference);
 
         const isHttps = webUrl.startsWith("https://");
+        const apiUrl = process.env.API_URL || "http://localhost:3100";
 
         const response = await preference.create({
             body: {
                 ...preferenceData,
                 back_urls,
-                ...(isHttps && { auto_return: "approved" }),
+                notification_url: `${apiUrl}/mercadopago/webhook`,
+                ...(isHttps && { auto_return: "all" }),
             }
         });
 
