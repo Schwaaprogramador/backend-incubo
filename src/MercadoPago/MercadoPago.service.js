@@ -1,16 +1,9 @@
 import { Preference } from "mercadopago";
 import { client } from "../MercadoPagoConfig.js";
 
-console.log("✅ MercadoPago service cargado");
-console.log("🟡 Creando instancia de Preference...");
-
 const preference = new Preference(client);
 
-console.log("✅ Instancia de Preference creada");
-
 const createPreference = async (preferenceData) => {
-    console.log("🔵 createPreference() - Iniciando...");
-
     const webUrl = process.env.WEB_URL || "http://localhost:4321";
     const back_urls = {
         success: `${webUrl}/checkout/success`,
@@ -19,7 +12,7 @@ const createPreference = async (preferenceData) => {
     };
 
     try {
-        console.log("🔵 Datos a enviar a MP:", JSON.stringify(preferenceData, null, 2));
+        console.log("🔵 createPreference() — items:", preferenceData.items?.length, "ref:", preferenceData.external_reference);
 
         const isHttps = webUrl.startsWith("https://");
 

@@ -4,6 +4,9 @@ import { Mongo } from "./MongoConfig.ts";
 import dotenv from "dotenv";
 dotenv.config();
 import cors from "cors";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import mongoSanitize from "express-mongo-sanitize";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -35,7 +38,38 @@ export class Server {
   }
 
   private config(): void {
-    this.app.use(express.json());
+    this.app.use(express.json({ limit: "1mb" }));
+    this.app.use(express.urlencoded({ extended: true, limit: "1mb" }));
+
+    // Seguridad HTTP headers
+    this.app.use(helmet({
+      crossOriginResourcePolicy: { policy: "cross-origin" }, // permite servir /uploads/ a otros origenes
+    }));
+
+    // Sanitizacion NoSQL injection
+    this.app.use(mongoSanitize());
+
+    // Rate limiting
+    this.app.use("/usuarios/login", rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutos
+      max: 10,
+      message: { error: "Demasiados intentos. Intentá de nuevo en 15 minutos." },
+      standardHeaders: true,
+      legacyHeaders: false,
+    }));
+    this.app.use("/mercadopago/crear-pago", rateLimit({
+      windowMs: 60 * 1000, // 1 minuto
+      max: 5,
+      message: { error: "Demasiadas solicitudes de pago. Esperá un momento." },
+      standardHeaders: true,
+      legacyHeaders: false,
+    }));
+    this.app.use(rateLimit({
+      windowMs: 60 * 1000, // 1 minuto
+      max: 120,
+      standardHeaders: true,
+      legacyHeaders: false,
+    }));
 
     // CORS
     const addWww = (url: string): string => {

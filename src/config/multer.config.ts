@@ -3,6 +3,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
 import sharp from "sharp";
+import { fileTypeFromBuffer } from "file-type";
 import type { Request, Response, NextFunction } from "express";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -40,38 +41,59 @@ export const uploadProducto = multer({
   },
 });
 
-// Middleware que convierte la imagen a WebP y la guarda en disco (una sola)
-export async function convertToWebp(req: Request, _res: Response, next: NextFunction) {
-  if (!req.file) return next();
+const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 
-  const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-  const filename = `producto-${uniqueSuffix}.webp`;
-  const filePath = path.join(UPLOADS_DIR, filename);
-
-  await sharp(req.file.buffer).webp({ quality: 85 }).toFile(filePath);
-
-  req.file.filename = filename;
-  req.file.path = filePath;
-
-  next();
+async function validarMagicBytes(buffer: Buffer): Promise<void> {
+  const tipo = await fileTypeFromBuffer(buffer);
+  if (!tipo || !ALLOWED_MIME_TYPES.includes(tipo.mime)) {
+    throw new Error(`Tipo de archivo no permitido. Solo se aceptan imágenes JPG, PNG, GIF o WebP.`);
+  }
 }
 
-// Middleware que convierte múltiples imágenes a WebP y las guarda en disco
-export async function convertToWebpArray(req: Request, _res: Response, next: NextFunction) {
-  if (!req.files || !Array.isArray(req.files) || req.files.length === 0) return next();
+// Middleware que convierte la imagen a WebP y la guarda en disco (una sola)
+export async function convertToWebp(req: Request, res: Response, next: NextFunction) {
+  if (!req.file) return next();
 
-  for (const file of req.files as Express.Multer.File[]) {
+  try {
+    await validarMagicBytes(req.file.buffer);
+
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     const filename = `producto-${uniqueSuffix}.webp`;
     const filePath = path.join(UPLOADS_DIR, filename);
 
-    await sharp(file.buffer).webp({ quality: 85 }).toFile(filePath);
+    await sharp(req.file.buffer).webp({ quality: 85 }).toFile(filePath);
 
-    file.filename = filename;
-    file.path = filePath;
+    req.file.filename = filename;
+    req.file.path = filePath;
+
+    next();
+  } catch (err: any) {
+    res.status(400).json({ error: err.message || "Archivo inválido" });
   }
+}
 
-  next();
+// Middleware que convierte múltiples imágenes a WebP y las guarda en disco
+export async function convertToWebpArray(req: Request, res: Response, next: NextFunction) {
+  if (!req.files || !Array.isArray(req.files) || req.files.length === 0) return next();
+
+  try {
+    for (const file of req.files as Express.Multer.File[]) {
+      await validarMagicBytes(file.buffer);
+
+      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+      const filename = `producto-${uniqueSuffix}.webp`;
+      const filePath = path.join(UPLOADS_DIR, filename);
+
+      await sharp(file.buffer).webp({ quality: 85 }).toFile(filePath);
+
+      file.filename = filename;
+      file.path = filePath;
+    }
+
+    next();
+  } catch (err: any) {
+    res.status(400).json({ error: err.message || "Archivo inválido" });
+  }
 }
 
 export const UPLOADS_PATH = UPLOADS_DIR;
