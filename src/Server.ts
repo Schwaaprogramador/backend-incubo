@@ -47,7 +47,12 @@ export class Server {
     }));
 
     // Sanitizacion NoSQL injection
-    this.app.use(mongoSanitize());
+    // Express 5 define req.query como getter de solo lectura — sanitizamos solo body y params
+    this.app.use((req, _res, next) => {
+      if (req.body) mongoSanitize.sanitize(req.body);
+      if (req.params) mongoSanitize.sanitize(req.params);
+      next();
+    });
 
     // Rate limiting
     this.app.use("/usuarios/login", rateLimit({
