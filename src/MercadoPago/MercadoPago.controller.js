@@ -1,8 +1,33 @@
 import { Payment } from "mercadopago";
+import { createHmac } from "crypto";
 import { client } from "../MercadoPagoConfig.js";
 import createPreference from "./MercadoPago.service.js";
 import { PedidosService } from "../Pedidos/Pedidos.service.js";
 import { ProductosService } from "../Productos/Productos.service.js";
+
+const validarFirmaWebhook = (req) => {
+  const secret = process.env.MP_WEBHOOK_SECRET;
+  if (!secret) return true; // Si no hay secret configurado, no bloquear
+
+  const xSignature = req.headers["x-signature"];
+  const xRequestId = req.headers["x-request-id"];
+  if (!xSignature || !xRequestId) return false;
+
+  // Parsear ts y v1 del header x-signature
+  const partes = Object.fromEntries(
+    xSignature.split(",").map((p) => p.split("=").map((s) => s.trim()))
+  );
+  const ts = partes["ts"];
+  const v1 = partes["v1"];
+  if (!ts || !v1) return false;
+
+  const dataId = req.body?.data?.id || req.query?.id || "";
+  const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`;
+
+  const firma = createHmac("sha256", secret).update(manifest).digest("hex");
+
+  return firma === v1;
+};
 
 const pedidosService = new PedidosService();
 const productosService = new ProductosService();
@@ -67,6 +92,11 @@ export const crearPago = async (req, res) => {
 
 // POST /mercadopago/webhook
 export const recibirWebhook = async (req, res) => {
+  if (!validarFirmaWebhook(req)) {
+    console.warn("⚠️ Webhook rechazado — firma inválida");
+    return res.sendStatus(401);
+  }
+
   // Responder 200 de inmediato para que MP no reintente
   res.sendStatus(200);
 

@@ -50,11 +50,15 @@ export class Server {
     };
     const webUrl = process.env.WEB_URL || "http://localhost:4321";
     const adminUrl = process.env.ADMIN_URL || "http://localhost:5173";
+    const dev = "http://localhost:4321";
+    const dev2 = "http://localhost:5173";
     const allowedOrigins = [
       webUrl,
       addWww(webUrl),
       adminUrl,
       addWww(adminUrl),
+      dev,
+      dev2
     ].filter(Boolean);
     this.app.use(cors({
       origin: (origin, callback) => {

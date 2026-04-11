@@ -21,8 +21,14 @@ const createPreference = async (preferenceData) => {
     try {
         console.log("🔵 Datos a enviar a MP:", JSON.stringify(preferenceData, null, 2));
 
+        const isHttps = webUrl.startsWith("https://");
+
         const response = await preference.create({
-            body: { ...preferenceData, back_urls, auto_return: "approved" }
+            body: {
+                ...preferenceData,
+                back_urls,
+                ...(isHttps && { auto_return: "approved" }),
+            }
         });
 
         console.log("✅ Respuesta MP exitosa - ID:", response.id);
